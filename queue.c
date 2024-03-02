@@ -63,6 +63,23 @@ bool q_insert_head(struct list_head *head, char *s)
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+
+    element_t *new_tail = malloc(sizeof(element_t));
+    if (!new_tail)
+        return false;
+
+    new_tail->value = (char *) malloc(strlen(s) + 1);
+
+    if (!new_tail->value) {
+        free(new_tail);
+        return false;
+    }
+    strncpy(new_tail->value, s, strlen(s));
+    new_tail->value[strlen(s)] = '\0';
+
+    list_add_tail(&new_tail->list, head);
     return true;
 }
 
