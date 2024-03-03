@@ -89,14 +89,13 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     if (!head || head->next == head) {
         return NULL;
     }
-    struct list_head *first_element = head->next;
-    element_t *entry = list_entry(first_element, element_t, list);
+    element_t *entry = list_first_entry(head, element_t, list);
 
-    if (sp != NULL && bufsize > 0) {
+    if (sp) {
         strncpy(sp, entry->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
-    list_del(first_element);
+    list_del(&entry->list);
     return entry;
 }
 
@@ -104,13 +103,12 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
     if (head && head->next != head) {
-        struct list_head *last_element = head->prev;
-        element_t *entry = list_entry(last_element, element_t, list);
-        if (sp != NULL && bufsize > 0) {
+        element_t *entry = list_last_entry(head, element_t, list);
+        if (sp) {
             strncpy(sp, entry->value, bufsize - 1);
             sp[bufsize - 1] = '\0';
         }
-        list_del(last_element);
+        list_del(&entry->list);
         return entry;
     }
     return NULL;
@@ -363,7 +361,7 @@ int q_descend(struct list_head *head)
         element_t *tmp = list_entry(current, element_t, list);
         safe = current->next;
 
-        if (strcmp(max, tmp->value) < 0) {
+        if (strcmp(max, tmp->value) <= 0) {
             max = tmp->value;
         } else {
             list_del(current);
