@@ -182,8 +182,80 @@ void q_reverseK(struct list_head *head, int k)
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
 }
 
-/* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+struct list_head *mergeSort(struct list_head *left, struct list_head *right);
+/* Split the linked list until one node or NULL */
+struct list_head *split(struct list_head *head)
+{
+    if (!head || !head->next)
+        return head;
+
+    struct list_head *fast = head, *slow = head;
+    while (fast != NULL && fast->next != NULL) {
+        fast = fast->next->next;
+        slow = slow->next;
+    }
+
+    struct list_head *mid = slow;
+    slow->prev->next = NULL;
+
+    struct list_head *left = split(head);
+    struct list_head *right = split(mid);
+
+    return mergeSort(left, right);
+}
+
+/* merge two sorted linked list */
+struct list_head *mergeSort(struct list_head *left, struct list_head *right)
+{
+    struct list_head *dummy = NULL;
+    struct list_head **indirect = &dummy;
+
+    for (; left && right;) {
+        struct list_head *cur = NULL;
+
+        if (strcmp(list_entry(left, element_t, list)->value,
+                   list_entry(right, element_t, list)->value) >= 0) {
+            cur = right;
+            right = right->next;
+        } else {
+            cur = left;
+            left = left->next;
+        }
+
+        *indirect = cur;
+        indirect = &cur->next;
+    }
+
+    if (left != NULL) {
+        *indirect = left;
+    } else {
+        *indirect = right;
+    }
+
+    return dummy;
+}
+
+/* sort elements of queue in ascending order */
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || head->next == head || head->next->next == head) {
+        return;
+    }
+
+    // break the link
+    head->prev->next = NULL;
+    head->next = split(head->next);
+
+    struct list_head *before = head, *after = head->next;
+
+    for (; after != NULL; after = after->next) {
+        after->prev = before;
+        before = after;
+    }
+
+    before->next = head;
+    head->prev = before;
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
