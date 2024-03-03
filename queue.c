@@ -142,9 +142,7 @@ bool q_delete_mid(struct list_head *head)
 
     list_del(slow);
 
-    element_t *middle_element = list_entry(slow, element_t, list);
-    free(middle_element->value);
-    free(middle_element);
+    q_release_element(list_entry(slow, element_t, list));
     return true;
 }
 
@@ -156,9 +154,9 @@ bool q_delete_dup(struct list_head *head)
         return false;
     if (list_is_singular(head))
         return true;
-    struct list_head *before, *safe;
+    struct list_head *before = head->next;
 
-    list_for_each_safe (before, safe, head) {
+    while (before != head && before->next != head) {
         element_t *entry = list_entry(before, element_t, list);
         bool flag = false;
         struct list_head *tmp = before->next;
@@ -167,17 +165,18 @@ bool q_delete_dup(struct list_head *head)
                strcmp(entry->value, list_entry(tmp, element_t, list)->value) ==
                    0) {
             flag = true;
-            list_del(tmp);
-            free(list_entry(tmp, element_t, list)->value);
-            free(list_entry(tmp, element_t, list));
-            tmp = before->next;
+            struct list_head *current = tmp;
+            tmp = tmp->next;
+
+            list_del(current);
+            q_release_element(list_entry(current, element_t, list));
         }
+        struct list_head *dummy = before;
+        before = tmp;
+
         if (flag) {
-            before = before->next;
-            tmp = before->prev;
-            list_del(tmp);
-            free(list_entry(tmp, element_t, list)->value);
-            free(list_entry(tmp, element_t, list));
+            list_del(dummy);
+            q_release_element(list_entry(dummy, element_t, list));
         }
     }
     return true;
