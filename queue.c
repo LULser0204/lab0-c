@@ -315,40 +315,54 @@ void q_sort(struct list_head *head, bool descend)
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
-int q_descend(struct list_head *head)
+
+int q_ascend(struct list_head *head)
+{
+    // https://leetcode.com/problems/remove-nodes-from-linked-list/
+    struct list_head *current = head->next;
+    struct list_head *next_list = current->next;
+
+    while (next_list != head) {
+        element_t *cur_element = list_entry(current, element_t, list);
+        element_t *next_element = list_entry(next_list, element_t, list);
+
+        if (strcmp(next_element->value, cur_element->value) > 0) {
+            next_list = next_list->next;
+            current = current->next;
+        } else {
+            list_del(next_list);
+            q_release_element(next_element);
+            next_list = current->next;
+        }
+    }
+    return q_size(head);
+}
+
+/*int q_ascend(struct list_head *head)
 {
     if (!head || list_empty(head)) {
         return 0;
     }
 
-    char *max = list_entry(head->prev, element_t, list)->value;
-    struct list_head *current = head->prev;
-
-    struct list_head *safe;
-    while (current != head) {
-        element_t *tmp = list_entry(current, element_t, list);
-        safe = current->prev;
-
-        if (strcmp(tmp->value, max) >= 0) {
-            max = tmp->value;
-        } else {
-            list_del(current);
-            q_release_element(tmp);
-        }
-        current = safe;
-    }
+   struct
     return q_size(head);
-}
+}*/
 
 /*Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
-int q_ascend(struct list_head *head)
+
+int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    q_descend(head);
+    if (!head || list_empty(head))
+        return 0;
 
+    q_reverse(head);
+    q_ascend(head);
+    q_reverse(head);
     return q_size(head);
 }
+
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
  * order */
