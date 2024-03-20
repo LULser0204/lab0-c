@@ -315,62 +315,37 @@ void q_sort(struct list_head *head, bool descend)
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
-int q_ascend(struct list_head *head)
+int q_descend(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if (!head || list_empty(head))
+    if (!head || list_empty(head)) {
         return 0;
-    q_reverse(head);
-    struct list_head *current = head->next;
-    char *max = list_entry(head->next, element_t, list)->value;
+    }
+
+    char *max = list_entry(head->prev, element_t, list)->value;
+    struct list_head *current = head->prev;
 
     struct list_head *safe;
-
     while (current != head) {
         element_t *tmp = list_entry(current, element_t, list);
-        safe = current->next;
+        safe = current->prev;
 
-        if (strcmp(max, tmp->value) > 0) {
+        if (strcmp(tmp->value, max) >= 0) {
             max = tmp->value;
         } else {
             list_del(current);
             q_release_element(tmp);
         }
-
         current = safe;
     }
-    q_reverse(head);
-
     return q_size(head);
 }
 
-/* Remove every node which has a node with a strictly greater value anywhere to
+/*Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
-int q_descend(struct list_head *head)
+int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if (!head || list_empty(head))
-        return 0;
-
-    q_reverse(head);
-    struct list_head *current = head->next;
-    char *max = list_entry(head->next, element_t, list)->value;
-
-    struct list_head *safe;
-    while (current != head) {
-        element_t *tmp = list_entry(current, element_t, list);
-        safe = current->next;
-
-        if (strcmp(max, tmp->value) <= 0) {
-            max = tmp->value;
-        } else {
-            list_del(current);
-            q_release_element(tmp);
-        }
-
-        current = safe;
-    }
-    q_reverse(head);
+    q_descend(head);
 
     return q_size(head);
 }
